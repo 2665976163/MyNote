@@ -176,6 +176,10 @@ git diff [本地库中历史版本][文件名]
 
 ​			四、git commit -m "日志信息"
 
+​	五、删除分支
+
+​		git branch -d [分支名称]
+
 
 
 
