@@ -1,0 +1,12 @@
+继承Thread --> 重写run方法 --> 调用start方法
+
+实现Runnable  -->  重写run方法  -->  将Runnable对象传入Thread,依靠Thread的start方法启动线程
+
+//步骤
+1.实现Callable
+
+2.重写call方法(该方法支持抛异常,可以有返回值,支持泛型) 
+
+3.因为Callable不是Runnbale或Thread的子类，而Thread仅支持Runnable 与 Thread 的子类，所以得依靠另一个实现类代理一下,将Callable的实例传入FutureTask构造方法中，
+
+4.然后将FutureTask实例传入Thread，调用start方法

@@ -1,0 +1,63 @@
+创建数据库
+CREATE DATABASE 数据库名;
+删除数据库
+DROP DATABASE 数据库名;
+查询数据库
+SHOW DATABASES;
+使用数据库
+USE 数据库名;
+=========================
+查询表
+SHOW TABLES;
+创建表
+CREATE TABLE 表名(
+     字段名 数据类型 [列属性][注释]
+);
+删除表
+DROP TABLE 表名;
+修改表
+ALTER TABLE 表名 RENAME AS 新表名;
+=========================
+字段添加
+ALTER Table 表名 ADD 字段名 数据类型 [列属性][注释];
+字段删除
+ALTER Table 表名 DROP 字段名;
+字段修改
+ALTER Table 表名 MODIFY 字段名 数据类型 [列属性][注释]; --> 不能修改字段名
+ALTER Table 表名 CHANGE 字段名 新字段名 数据类型 [列属性][注释];--> 能修改字段名
+字段查询
+SELECT 字段名 FROM 表名;
+=========================
+数据添加
+INSERT INTO 表名[参数] VALUES(表内字段);
+数据修改
+UPDATE 表名 SET [字段1 = 值] [字段2 = 值] where [条件筛选]
+数据删除
+DELETE FROM 表名 WHERE 字段 = 数据;
+清除表内所有数据
+truncate table testBase;
+数据查询
+SELECT * FROM 表名;
+==========================
+约束：
+	PRIMARY KEY 主键
+	UNIQUE KEY 唯一键
+	FOREIGN KEY 外键   --> 使用  FOREIGN KEY(字段名) REFERENCES 表名(字段名);
+==========================
+外键约束创建会对会对多表的数据产生一定的影响。Mysql提供以下几种参照操作
+cascade：从主表删除或者更新且自动删除或更新从表中的内容。
+set null：从主表中删除或者更新且从表中匹配的内容设置为null，使用此功能必须保证从表的字段没有被设置为not null。
+restrict：拒绝对父表的删除或更新操作。
+No action：标准sql关键字，在mysql中与restrict相同。
+=====================================
+添加主键约束：
+ALTER TABLE 表名 add constraint 约束名 PRIMARY KEY 表名(主键字段);
+删除主键约束：
+ALTER TABLE 表名 DROP PRIMARY KEY;
+添加外键约束：
+alter   table 从表   add  constraint  约束名 foreign   key  (从表外键字段)   references  主表  （主键字段）;
+删除外键约束：
+ALTER TABLE 表名 DROP FOREIGN KEY 外键约束名;
+
+
+set names 编码;

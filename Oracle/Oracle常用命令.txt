@@ -1,0 +1,26 @@
+-- 创建用户
+create 用户名 identified by 密码;
+-- 授予连接登陆权限
+grant connect 用户名;
+-- 授予资源操作权限
+grant resource 用户名;
+-- 去除重复项
+select distinct 字段名,字段名 from 表名;
+-- 查询表信息
+select 字段名 from 表名;
+-- 插入数据
+insert into 表名 values(数据项);
+-- 创建数据表
+create table 表名 values(
+    --数据项
+    字段名 数据类型(个数);
+)
+select * from STUDENT order by 以指定字段排序;
+-- 条件语句 where  后面可以跟条件
+	where 子语关键字：[and，or，like，is Null，is not Null，in，between and]
+	逻辑运算符 or [或] and [且] not [非] lick[包含] 
+	in[同时多个不一样的值] 如 select * from 表名 there SNAME in(123,122,111)
+	%[任意多个任意字符] 
+	_[一个任意字符]
+	<>不等于
+	escape '内容' 将单引号中的数据作为转义字符如： select * from 表名 where like '%/_%' escape'/'; 

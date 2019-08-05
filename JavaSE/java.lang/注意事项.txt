@@ -1,0 +1,9 @@
+1.如果try语句块中存在return语句，那么首先会执行finally语句块中的代码，然后才返回
+2.finally语句唯一不被执行的情况是方法执行了System.exit()方法
+3.throw语句后不允许有紧跟其他语句，因为这些没有机会执行
+4.异常的捕获是从小到大的捕获，要有次序
+5.try语句不能单独存在，可以和
+	catch、finally组成 
+	try...catch...finally、 
+	try...catch、try...finally三种结构，
+	catch语句可以有一个或多个， finally语句最多一个，try、catch、finally这三个关键字均不能单独使用。
