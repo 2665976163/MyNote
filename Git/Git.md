@@ -184,8 +184,6 @@ git diff [本地库中历史版本][文件名]
 
 
 
-
-
 > pull	拉取
 
 pull	=  fetch + merge
@@ -193,3 +191,12 @@ pull	=  fetch + merge
 ​	fetch：将远程分支下载到本地但未和本地分支合并
 
 ​	merge：合并分支
+
+
+
+
+
+
+
+> 删除文件		rm -r 文件名
+
