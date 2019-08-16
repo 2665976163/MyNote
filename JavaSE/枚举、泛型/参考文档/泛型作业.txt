@@ -1,0 +1,11 @@
+1.编写一个泛型方法，自动将Object类型的对象转换成其他类型。
+
+2.定义一个方法，把任意参数类型的集合中的数据安全的复制到相应类型的数组中去
+
+3.定义泛型接口Calc<T>,包含方法如下
+	addition(T t1,T t2);
+	subtraction(T t1,T t2);
+	multiplication(T t1,T t2);
+	division(T t1,T t2);
+  定义类实现以上接口，并在测试类中完成测试
+

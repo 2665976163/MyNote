@@ -1,0 +1,75 @@
+项目：王者荣耀
+
+需求：设计部分架构，
+类：Hero:
+	name:名字
+	heroType：英雄类型
+	attack：攻击力
+	life：生命值
+	Skin[]:皮肤
+
+接口：skin
+	name:皮肤名称
+	Subordinate：所属英雄
+	
+	
+	
+
+枚举：HeroType:
+	Warrior:战士
+	Shooter:射手
+	Master：法师	
+	Assassin:刺客
+	Auxiliary:辅助
+
+			1.创建数据文件存储英雄信息和皮肤信息
+			2.读取英雄数据并创建各个英雄对象
+			3.读取皮肤数据，利用反射解析指定的类模板并创建对象
+			4.将皮肤添加到对应英雄对象的Skin属性中
+			5.打印所有英雄的信息
+			
+
+
+
+
+数据文件格式1：使用文件流进行存储读取数据操作
+英雄信息模板：
+	name=后羿
+	heroType=Shooter
+	attack=100
+	life=3000
+	--------->	自定义分割符
+	name=亚瑟
+	heroType=Warrior
+	attack=80
+	life=4000
+皮肤信息模板：
+	ClassName=com.znsd.XxxSkin   XxxSkin类是skin接口的实现类
+	name=逐日之弓
+	Subordinate=后羿
+	--------->	自定义分割符
+	ClassName=com.znsd.XxxSkin2    XxxSkin2类是skin接口的实现类
+	name=狮心王
+	Subordinate=亚瑟
+
+
+数据文件格式2：使用Properties进行存储数据操作
+
+英雄信息模板：
+	后羿=Shooter-100-3000
+	亚瑟=Warrior-80-4000
+皮肤信息模板：
+	逐日之弓=com.znsd.XxxSkin-后羿
+	狮心王=com.znsd.XxxSkin2-亚瑟
+	
+
+
+
+
+
+
+
+
+
+
+
