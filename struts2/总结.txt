@@ -1,0 +1,32 @@
+快速入门
+导入struts2 jar包【演示案例中】
+配置核心配置文件struts.xml【注意配置约束，可能出现404】
+<struts>
+	<package name="test_package"  extends="struts-default" namespace="/">
+		<action name="myAction" class="com.znsd.myAction" method="execute">
+			<result name="ok" type="redirect">
+				/index.jsp
+			</result>
+		</action>
+	</package>
+</struts>
+配置过滤器【演示案例】
+
+分模块开发导入外部xml文件
+
+三种action 实现方式
+	1. 直接写action
+	2.实现Action接口
+	3.继承ActionSupport
+
+获取表单数据
+	1.ServletActionContext
+	2.ActionContext
+	3.动态生成
+获取域对象
+	ServletActionContext.getRequest()
+	ServletActionContext.getResponse()
+	ServletActionContext.getRequest().getSession();
+	ServletActionContext.getServletContext();
+
+============================9月1日=====================================
