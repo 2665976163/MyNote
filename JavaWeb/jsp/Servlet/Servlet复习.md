@@ -668,3 +668,956 @@ Cookie cookies = request.getCookies();
 System.out.println(new Data(Integer.valueof(cookies[1].getValue)));
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+
+## Session
+
+**【概念】**
+
+​	服务器会话技术，将一次会话多次请求间共享数据，将数据存储在服务器端的对象中，httpSession.
+
+​	与cookie作用差不多，cookie主要将数据存储在客户端【不安全，用户在开发者工具中可以查看cookie中的
+
+​	数据，若存在账户则可能发生密码泄露等问题】，而session将数据存储在服务端从而解决此问题，但终究还
+
+​	是依赖于cookie.
+
+​	
+
+**【原理】**
+
+​	在用户访问服务器端时，服务器端会默认给客户端分配一个默认的cookie对象，
+
+​	对象名=JSESSIONID，值为随机生成【JSESSIONID=D89F8A428DFDD037BCA4123F2158BF07 】，
+
+​	先前我们将用户的账号密码存储在用户那里，当用户来请求时，我们就从客户端读取先前存储的cookie中的	
+
+​	账号密码，从而识别用户的身份，但现在用户的信息存储在服务端，session是怎么做到可以识别用户的？，
+
+​	就是依赖于开始默认给客户端分配的cookie对象，首先获取客户端默认的cookie对象，通过该cookie的value
+
+​	去session中找是否有该value对应的value，我们开始向session中存储数据的时候就是拿客户端默认的cookie
+
+​	中value作为键，然后账号密码作为值，当用户多次请求时好可以获取到之前存储的数据，但前提是不能关闭
+
+​	客户端，因为关闭客户端时再次请求时会重新分配默认cookie的值，导致数据在服务器存在，但客户端却拿
+
+​	不到，解决方法就是将第一次请求的默认cookie保存起来，设置cookie的生命周期，返回给客户端，因为名
+
+​	称一样，会覆盖客户端的默认Cookie值，当客户端再次请求时服务端就不会分配cookie对象给客户端了，因	
+
+​	为开始已经给默认的cookie对象设置了生命周期了，等时间过了才会再次分配.
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 验证码
+
+生成验证码格式
+
+```java
+@Override
+protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
+	int width = 100;
+	int height = 50;
+	// 创建验证码对象
+	BufferedImage img = new BufferedImage(width,height,BufferedImage.TYPE_INT_RGB);
+	// 美化图片，获取图像对象
+	Graphics g = img.getGraphics();
+	// 设置下一次使用的颜色
+	g.setColor(Color.BLACK);
+	// 填充验证码背景颜色
+	g.fillRect(0, 0, width, height);
+	// 设置下一次使用的颜色
+	g.setColor(Color.CYAN);
+	//  边框颜色 
+	g.drawRect(0, 0, width-1, height-1);
+	// 设置下一次使用的颜色
+	g.setColor(Color.GRAY);
+	// 设置验证码文字
+	String str = "ABCDEFGHIJKMNOPQRSTUVWSYZabcdefghijkmnopqrstuvwd0123456789";
+	Random r = new Random();
+    // 设置文字位置，等随机文字
+	for(int i=0;i<4;i++) {
+		g.drawString(str.charAt(r.nextInt(str.length()))+"",(width/5)*i,25);
+	}
+    // 设置干扰线
+	for(int i=0;i<10;i++) {
+		int x1 = r.nextInt(width);
+		int y1 = r.nextInt(width);
+		int x2 = r.nextInt(height);
+		int y2 = r.nextInt(height);
+		g.drawLine(x1, y1, x2, y2);
+	}
+	// 将验证码图片返回给界面
+	ImageIO.write(img, "jpg", resp.getOutputStream());
+}
+```
+
+点击切换图片
+
+```html
+<script>
+	window.onload = function(){
+		var img = document.getElementById("sss");
+		img.onclick = function(){
+			var date = new Date().getTime();
+			img.src = "/web_Demo_002/VCServlet?"+date;
+		}
+	}
+</script>
+<body>
+	<img id="sss" src="/web_Demo_002/VCServlet" />
+	看不清？瞎了？点击图片换一张吧
+</body>
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+## jsp	
+
+
+
+
+
+
+
+### jsp指令
+
+**【作用】**
+
+​	用于配置jsp页面，导入资源文件.
+
+**【格式】**
+
+```xml
+<%@ 指令名称 属性名1=属性值1 属性名2=属性值2 ... %>
+```
+
+**【分类】**
+
+​	1.page		: 配置jsp页面的
+
+```java
+> contentType : 等同于response.setContentType();
+	1.设置响应体的mime类型以及字符集
+	2.设置当前jsp页面源码（高级工具生效）
+> improt : 导包
+> errorPage : 当前界面发生异常自动跳转到指定界面
+> isErrorPage : 标识当前是否为错误页面
+	> false : 默认值,不能使用内置Exception
+	> true : 可以使用Exception
+```
+
+​	2.include	: 引入其他页面的资源文件【类似于html的框架，引入其他界面资源】
+
+```xml
+<% @include file="界面名.jsp" %>
+```
+
+​	![include](images\include.png)
+
+![include效果](images\include效果.png)
+
+
+
+​	3.taglib		: 导入资源【比如struts2的标签库】
+
+```xml
+<%@ taglib uri="/struts-tags" prefix="s" %>
+```
+
+
+
+
+
+### 注释
+
+jsp中可以使用注释：html、jsp【java但仅限于代码片段中】
+
+```html
+<!--  --> html的注释，不能注释标签
+```
+
+```java
+<%--  --%>  jsp的注释，可以注释所有内容.
+```
+
+
+
+
+
+
+
+
+
+### 内置对象
+
+使用时无需new，jsp内置的，可以直接调用.
+
+**【目录】**
+
+   	1. pageContext		------		PageContext				当前页面共享【可以获取其他8个内置对象】
+   	2. request			------		HttpServletRequest		一次请求共享【请求转发】
+   	3. session			------		HttpSession				一次会话共享
+   		. application            ------		ServletContext			所有用户共享
+   		. response		------		HttpServletResponse		响应对象
+   		. page			------		this						当前servlet对象
+   		. out			        ------		javax.servlet.jsp.JspWriter	输出对象，数据输出到页面上
+   		. config			------		ServletConfig			servlet的配置对象
+   		. exception		------		Throable				异常对象
+
+前面的仅为变量名，而对应真实的类型为后面的，可以在jsp转为servlet中查看.
+
+
+
+
+
+
+
+### MVC 开发模式
+
+1. jsp演变历史
+
+   1. 早期只有servlet,只能使用response输出标签数据,非常麻烦.
+   2.  后来出现了jsp，简化了Servlet的开发，如果过度使用jsp，在jsp中即写大量的java代码，有写html表，造成难于维护，难于分工协作.
+   3. 再后来，java的web开发，借鉴mvc开发模式，使得程序的设计更加合理性.
+
+2. MVC
+
+   1. M=	Model 模型	JavaBean.
+
+      ​	\> 完成具体的业务操作，如：查询数据库、封装对象
+
+   	. V=	View 视图	Jsp
+
+      ​	\> 展示数据
+
+   	. C=	Controller 控制器	Servlet
+
+      ​	\> 获取用户的输入
+
+      ​	\> 调用模型
+
+      ​	\> 将数据交给视图显示
+
+**【优缺点】**
+
+ 	1. 优点
+      	1. 耦合性低，方便维护，可以利于分工协作
+      	2. 重用性高
+		2. 缺点
+      	1. 使得项目架构变得复杂，对开发人员要求高
+
+
+
+
+
+
+
+
+
+
+
+
+
+### EL 表达式
+
+**【概念】** Expression Language 表达式语言.
+
+**【作用】** 替换和简化jsp界面中java代码的编写.
+
+**【语法】** ${表达式}
+
+**【注意】**
+
+​	jsp默认支持 EL表达式，若想忽略 EL表达式 则可以使用以下方法
+
+​	\> 在jsp中page指令中添加 isELIgnored= "true" ，若为true则忽略该界面全部EL表达式
+
+```xml
+<%@ page language="java" contentType="text/html; charset=UTF-8" isELIgnored= "true"
+    pageEncoding="UTF-8"%>
+```
+
+​	\> 使用转义符忽略单个EL表达式
+
+```xml
+\${}
+```
+
+**【使用】**
+**1.运算**
+	**【运算符】**
+		1.算数运算符 +   -  *  /(div)  %(mod)
+
+​		2.比较运算符	>  <  >=  <=  ==  !=	
+
+​		3.逻辑运算符: &&(and) II(or) !(not)
+
+​		4.空运算符: empty
+
+​			用于判断字符串、集合、数组对象是否为null并且长度是否为0
+
+​			有值为false，没值为true
+
+​			${empty list}	若list为null或者长度为0则为true
+
+​	
+
+**2.获取值**
+
+el表达式只能从域对象中获取值
+	**\> 语法**
+
+​	1. ${域名称.键名} :从指定域中获取指定键的值.
+
+​		**\> 域名称**
+
+​			pageScope --- pageContext
+
+​			requeStscope --- request
+
+​			sessionScope --- session 
+
+​			applicationScope --- application (ServletContext)
+
+**举例**
+
+```java
+ //在request域中存储了name=张三
+ ${requestscope.name}; //返回一个张三
+```
+
+​	2. ${键名} : 从小到大找域的值，找到即返回.
+
+**举例**
+
+```java
+${pageScope.setAttribute("abc","xjy1")}
+${requestscope.setAttribute("abc","xjy2")}
+${sessionScope.setAttribute("abc","xjy3")}
+首先在三个域中都存储了相同的键
+${abc}	//结果 xjy1 因为page域范围最小.	
+```
+
+#### **获取对象**
+
+```html
+<body>
+	<%
+		JavaBean bean = new JavaBean();
+		bean.setUser("admin");
+		bean.setPsWord("123");
+		request.setAttribute("bean", bean);
+	%>
+	${requestScope.bean.user}<br />
+	${requestScope.bean.psWord}<br />
+</body>
+```
+
+#### **获取List集合**
+
+```html
+<body>
+	<%
+		List list = new ArrayList();
+		list.add("abc");
+		request.setAttribute("list", list);
+	%>
+	${list[0]}<br />
+</body>
+```
+
+#### **获取Map集合**
+
+```html
+<body>
+	<%
+		Map map = new HashMap();
+		map.put("abc","aabbcc");
+		request.setAttribute("map", map);
+	%>
+	<!-- 俩种方式 -->
+	${map.abc}<br />
+	${map["abc"]}<br />
+</body>
+```
+
+**获取map中对象的值**
+
+```html
+<body>
+	<%
+		Map map = new HashMap();
+		JavaBean user = new JavaBean();
+		user.setUser("root");
+		user.setPsWord("123");
+		map.put("user", user);
+		request.setAttribute("map", map);
+	%>
+	<!-- 俩种方式 -->
+	${map.user.user}<br />
+	${map.user.psWord}<br />
+</body>
+```
+
+
+
+
+
+#### 隐式对象
+
+![EL11隐式对象](images\EL11隐式对象.png)
+
+
+
+
+
+
+
+### JSTL
+
+**【概念】**
+
+​	JavaServer Pages Tag Library JSP标准 标签库，是由Apache组织提供的开源的免费的jsp标签	<标签>
+
+**【作用】**
+
+​	用于简化和替换jsp页面上的java代码
+**【使用步骤】**
+
+​	1. 导入jst1相关jar包
+
+​	2. 引入标签库: taglib指令: <%@ taglib %>
+
+​	3. 使用标签
+
+#### IF
+
+类似于java的IF.
+
+使用格式.
+
+```html
+<c:if test="条件"></c:if>
+<!-- 如果表达式为true，则显示if标签体内容，如果为false，则不显示标签体内容 -->
+```
+
+**【案例】**
+
+```html
+<!-- 导入标签库 -->
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<!-- 代码片段 -->
+<body>
+	<% request.setAttribute("value", "abc"); %>
+    	<!-- empty 若域中元素为null或长度为0则为true not 取反 -->
+	<c:if test="${not empty requestScope.value}">	
+		哇，还活着.
+	</c:if><br />
+	<c:if test="${empty requestScope.value}">
+		哇，是真的.
+	</c:if>
+</body>
+```
+
+注意
+
+​	**\>** if标签没有else，想要else，则可以在定义一个if标签
+
+​	**\>** 使用if标签时必须有test标签，test标签内为条件语句，test中可以使用EL表达式
+
+
+
+
+
+
+
+#### choose
+
+类似于java的switch.
+
+使用格式.
+
+```html
+<c:choose>
+	<c:when test="${requestScope.value == 1}">若值为1则显示</c:when>
+    <c:when test="${requestScope.value == 2}">若值为2则显示</c:when>
+    <c:otherwise>default值</c:otherwise>
+</c:choose>
+```
+
+**【案例】**
+
+```html
+<!-- 导入标签库 -->
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<!-- 代码片段 -->
+<body>
+	<%
+		request.setAttribute("value", 1);
+	%>
+	<c:choose>
+		<c:when test="${value == 1}">星期一</c:when>
+		<c:when test="${value == 2}">星期二</c:when>
+		<c:when test="${value == 3}">星期三</c:when>
+		<c:otherwise>默认值</c:otherwise>
+	</c:choose>
+	<br/>
+</body>
+```
+
+
+
+
+
+
+
+#### Foreach
+
+类似于java的for循环.
+
+使用格式.
+
+```html
+<!-- 导入标签库 -->
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<!-- 代码片段 -->
+<body>
+	<c:forEach begin="1" end="10" var="i" step="2" varStatus="s" >
+     <!-- begin:开始 end:结束 var:变量名 step:步增 varStatus:循环状态对象 -->
+		${i}		<!-- 变量名的值 -->
+		${s.index} 	 <!-- 下标 与 变量名的内容一致 -->
+		${s.count} 	 <!-- 循环次数 -->
+	</c:forEach>
+</body>
+```
+
+迭代List集合
+
+```html
+<!-- 导入标签库 -->
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<!-- 代码片段 -->
+<body>
+	<% 
+		JavaBean bean1 = new JavaBean("admin01","123");
+		JavaBean bean2 = new JavaBean("admin02","123");
+		JavaBean bean3 = new JavaBean("admin03","123");
+		JavaBean bean4 = new JavaBean("admin04","123");
+		JavaBean bean5 = new JavaBean("admin05","123");
+		JavaBean bean6 = new JavaBean("admin06","123");
+		JavaBean bean7 = new JavaBean("admin07","123");
+		JavaBean bean8 = new JavaBean("admin08","123");
+		List list = new ArrayList();
+		list.add(bean1);
+		list.add(bean2);
+		list.add(bean3);
+		list.add(bean4);
+		list.add(bean5);
+		list.add(bean6);
+		list.add(bean7);
+		list.add(bean8);
+		request.setAttribute("list", list);
+	%>
+	<table border="1">
+		<c:forEach begin="0" end="${list.size()}" items="${list}" var="i" varStatus="s">
+			<tr>
+				<th>${i.user}</th>
+				<th>${i.psWord}</th>
+			</tr>
+		</c:forEach>
+	</table>
+</body>
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Filter 过滤器
+
+​	平常用户直接可以访问目标路径，但出现过滤器后想访问目标路径首先背后会被过滤器拦截，然后经过一些操作之后再选择性判断你是否满足访问目标路径的条件，若不满足则做其他操作.
+
+**【创建过程】**
+
+​	**\>** 实现 Filter 接口	**javax.servlet.Filter**
+
+​	**\>** 配置过滤器信息 注解 || web.xml
+
+​	**\>** 是否放行 filterChain.doFilter(request, response)
+
+**注意：** 若出现俩个过滤器过滤的是相同的内容则类名Unicode值小的先执行 
+
+```java
+// 举例
+@webFilter("/*")	//AFilter 的过滤内容
+@webFilter("/*")	//BFilter 的过滤内容
+//执行A过滤器内容，因为A比B小
+```
+
+
+
+**【注解案例】**
+
+```java
+@WebFilter("/*")  // 注解方式声明过滤器
+public class MyFilter implements Filter{
+
+	@Override
+	public void doFilter(ServletRequest request, 
+                         ServletResponse response, FilterChain filterChain){
+		System.out.println("拦截咯");
+         //放行
+		filterChain.doFilter(request, response);
+	}
+}
+```
+
+**【XML案例】**
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" id="WebApp_ID" version="3.1">
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+  </welcome-file-list>
+     <filter>
+        <filter-name>filter</filter-name>
+        <filter-class>Filter.MyFilter</filter-class>	<!-- 过滤器类 -->
+    </filter>
+    <filter-mapping>
+        <filter-name>filter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+</web-app>
+```
+
+
+
+
+
+#### 执行流程
+
+ 	1. 执行过滤器
+		2. 执行放行代码
+		3. 放行代码执行完毕后再回来执行未执行的代码.
+
+**【案例】**
+
+```java
+public void doFilter(ServletRequest arg0, ServletResponse arg1, FilterChain arg2){
+		System.out.println("拦截咯");
+		arg2.doFilter(arg0, arg1);	// 放行
+		System.out.println("执行完放行后的资源回来再打印当前语句");
+}
+```
+
+
+
+
+
+
+
+
+
+#### 生命周期
+
+1. init:在服务器启动后，会创建Filter对象， 然后调用init方法。只执行-次。用于加载资源
+2. doFilter:每一次请求被拦截资源时，会执行。执行多次
+3. destroy:在服务器关闭后，Filter对象被销毁。如果服务器是正常关闭，则只会执行一次。用于释放资源
+
+
+
+
+
+
+
+#### 过滤器配置详解
+
+##### 拦截路径配置
+
+​	拦截器只拦截指定或部分资源.
+
+**【四种情况】**
+
+​	写在过滤器的注解内或xml配置中就可以了
+
+**1. 具体资源路径: /index.jsp**
+
+​	只有访问index. jsp资源时，过滤器才会被执行
+
+**2. 拦截目录: /user/***	模糊拦截【有可能资源名称以/user/*开始，又可能真实存在user目录】
+
+​	访问/user下的所有资源时,过滤器都会被执行
+
+**3. 后缀名拦截: *.jsp**	模糊拦截
+
+​	访问所有后缀名为jsp资源时，过滤器都会被执行
+
+**4. 拦截所有资源: /***
+
+​	访问所有资源时，过滤器都会被执行
+
+**【案例演示】**
+
+```java
+@WebFilter("/user/*")	
+public class MyFilter implements Filter{
+	@Override
+	public void doFilter(ServletRequest arg0, ServletResponse arg1, FilterChain arg2){
+		System.out.println("拦截咯");
+		arg2.doFilter(arg0, arg1);	// 放行
+	}
+}
+
+```
+
+> Servlet
+
+```java
+@WebServlet("/user/AServlet")	
+class AServlet extends HttpServlet{
+    @Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp){
+        System.out.println("当访问/user/AServlet不会直接访问到我而是执行拦截器");
+	}
+}
+@WebServlet("/user/BServlet")	
+class BServlet extends HttpServlet{
+    @Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp){
+        System.out.println("当访问/user/BServlet不会直接访问到我而是执行拦截器");
+	}
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+##### 拦截方式配置
+
+资源被访问的方式，若不配置则只有请求转发才能被过滤器拦截.
+
+​	 **注解配置**
+
+​		设置dispatcherTypes属性
+
+​			REQUEST 默认值。浏览器直接请求资源【重定向】
+
+​			FORWARD 请求转发访问资源
+
+​			INCLUDE 包含访问资源
+
+​			ERROR 错误跳转资源
+
+​			ASYNC 异步访问资源
+
+```java
+@WebFilter(value="/*",dispatcherTypes= {DispatcherType.REQUEST,DispatcherType.FORWARD })
+```
+
+​	**web. xml配置**
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" id="WebApp_ID" version="3.1">
+  <filter>
+    <filter-name>struts2</filter-name>
+    <filter-class>Filter.MyFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>struts2</filter-name>
+    <url-pattern>/index.jsp</url-pattern>
+    <dispatcher>REQUEST</dispatcher> <!-- 核心 -->
+    <dispatcher>FORWARD</dispatcher> <!-- 核心 -->
+  </filter-mapping>
+</web-app>
+```
+
+
+
+
+
+**【作业】**
+
+ 1. 判断用户是否登陆
+
+    **\>** 用户在没进行登陆时访问需要登陆才能访问的资源时进行拦截让用户返回到登陆界面
+
+    **\>** 但用户访问登陆时也会被拦截，当访问登陆时直接放行，获取访问路径判断是否包含登陆页面.
+
+    **\>** 拦截器会拦截一切资源包含css、js所有资源，当访问页面包含这些也要进行判断放行.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Listenter 监听器
+
+监听一个对象的诞生与销毁，对象的变化【增删查改】等.
+
+**【监听器对象】**
+
+- ServletContext
+- HttpSession
+- ServletRequest
+
+以上三个对象包含许多监听器，以下举例几个.
+
+**【过程】**
+
+​	**\>** 实现监听器接口，重新接口方法
+
+​	**\>**  注册监听器、注解或者xml
+
+> 注解
+
+```java
+@WebListener
+```
+
+> xml
+
+```xml
+<listener>
+  	<listener-class>listener.MyLister</listener-class>
+</listener>
+```
+
+**【案例演示】**
+
+> ServletContextListener
+
+```java
+@WebListener
+public class MyLister implements ServletContextListener {
+
+	@Override
+	public void contextDestroyed(ServletContextEvent sce) {
+		System.out.println("监听器关闭");
+	}
+
+	@Override
+	public void contextInitialized(ServletContextEvent sce) {
+		System.out.println("监听器初始化完毕");
+	}
+}
+```
+
+> ServletRequestListenter
+
+```java
+public class RequestListenter implements ServletRequestAttributeListener{
+
+	@Override
+	public void attributeAdded(ServletRequestAttributeEvent srae) {
+		System.out.println("rquest中增加了一个参数");
+	}
+
+	@Override
+	public void attributeRemoved(ServletRequestAttributeEvent srae) {
+		System.out.println("rquest中删除了一个参数");
+	}
+
+	@Override
+	public void attributeReplaced(ServletRequestAttributeEvent srae) {
+		System.out.println("rquest中修改了一个参数");
+	}
+
+}
+```
+
+> ServletContextListener
+
+```java
+@WebListener
+public class SessionListenter implements HttpSessionListener {
+	private int count;
+    public void sessionCreated(HttpSessionEvent se)  { 
+    	System.out.println("一个会话对象被创建了    当前用户="+(++count));
+    	se.getSession().setAttribute("count", count);
+    }
+    public void sessionDestroyed(HttpSessionEvent se)  { 
+    	System.out.println("一个会话对象被销毁了 当前用户="+(--count));
+    	se.getSession().setAttribute("count", count);
+    }
+}
+```
+
+**注意：** session关闭浏览器后不会被销毁，默认30分钟后才会被销毁

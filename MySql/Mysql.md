@@ -410,6 +410,143 @@ SELECT * FROM studentBASE;
 
 
 
+## 分组查询
+
+```mysql
+select * from 表名 where 分组前条件 group by 字段 having 分组后条件. 
+```
+
+
+
+
+
+
+
+
+
+
+
+## 分页查询
+
+```mysql
+select * from 表名 limit 4,5;
+```
+
+**【注意事项】**
+
+	1. 必须在语句最后
+	2. limit 从哪里开始，显示几行
+
+
+
+
+
+
+
+## 内连接、外连接、自连接
+
+**【内连接】**
+
+​	表中至少有一个匹配项则返回行，否则不显示
+
+```mysql
+select * from 主表 join 其他表 on 连接条件;
+```
+
+> 举例
+
+```mysql
+select * from student join result on student.studentNo = result.studentNo;
+```
+
+当学生学号与成绩中的学生学号一致时我才知道这个成绩是属于这个学生的.
+
+
+
+
+
+
+
+**【外连接】**
+
+左外连接.
+
+**左表为主表，右表为从表**
+
+​	若主表在从表中没有匹配项则用null补充，若从表没有主表的匹配项则不显示.
+
+```mysql
+select * from 左表 left join 右表 on 连接条件; 
+```
+
+
+
+
+
+右外连接.
+
+**右表为主表，左表为从表**
+
+​	若主表在从表中没有匹配项则用null补充，若从表没有主表的匹配项则不显示.
+
+```mysql
+select * from 左表 right join 右表 on 连接条件;
+```
+
+
+
+
+
+
+
+
+
+
+
+**【自连接】**
+
+​	自己连自己，产生场景：存储菜单项，有子菜单，父菜单，但都存入菜单表内，子菜单有字段标识父菜单的id，但与父菜单在同一行，只清楚父菜单的id，不清楚父菜单的名称，但又无法使用条件匹配，因为在同一张表中，所以就要使用自连接，产生一张与自己一模一样的表，然后与它进行比较，找出父菜单.
+
+> 以上案例解法
+
+```mysql
+select * from 菜单 AS b1 inner join 菜单 AS b2 on b1.父id = b2.id;
+```
+
+> 第二种
+
+```mysql
+select * from 菜单 AS b1,菜单 AS b2 where b1.父id = b2.id;
+```
+
+
+
+
+
+**【格式】**
+
+```mysql
+select * from 表名 AS b1 inner join 表名 AS b2 on 连接条件;
+```
+
+通过以下方式也能生成俩张一模一样的表
+
+```mysql
+select * from 菜单 AS b1,菜单 AS b2;
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## 事务
@@ -662,9 +799,9 @@ DELIMITER ;
 【步骤】
 
  	1. 首先将结束分隔符替换成其他符号 【DELIMITER $$】
- 	2. 创建存储过程【CREATE  PROCEDURE 存储过程名() 】，从【BEGIN】开始，到【END】结束
- 	3. 声明全局异常【DECLARE EXIT HANDLER FOR SQLEXCEPTION】【BEGIN ~ END】
-      	1. 只要该存储过程中出现异常，都执行该异常处理.
+		2. 创建存储过程【CREATE  PROCEDURE 存储过程名() 】，从【BEGIN】开始，到【END】结束
+		3. 声明全局异常【DECLARE EXIT HANDLER FOR SQLEXCEPTION】【BEGIN ~ END】
+     		1. 只要该存储过程中出现异常，都执行该异常处理.
 	4. 存储过程中开启事务
     	1. 执行需要转账的操作，若没有出现异常则提交事务，否则交给全局异常处理
 	5. 将结束分隔符改为原来的 ;
@@ -762,11 +899,314 @@ commit;
 
 
 
+## 函数
+
+\> 主要核心 方法名、返回类型、返回值 .
+
+> 无参函数格式
+
+```mysql
+DELIMITER $$	-- 切换结束符 因为函数中可能有语句包含;所以会导致创建结束
+CREATE FUNCTION `fun_noArgs`() 	-- 参数名称
+RETURNS INT	-- 返回类型
+BEGIN
+	RETURN 1;	-- 返回值
+END $$
+DELIMITER ;	-- 切换回来
+```
+
+> 有参函数格式
+
+```mysql
+DELIMITER $$
+CREATE FUNCTION `fun_Args`(a INT,b INT) 
+RETURNS INT
+BEGIN
+	RETURN a + b;
+END $$
+DELIMITER ;
+```
+
+**【函数中定义变量】**
+
+```mysql
+DELIMITER $$
+create function fun_test() returns int
+begin
+	declare num1 int default 10;	-- 默认赋值 10
+	declare num2 int default 20;	-- 默认赋值 20
+	set num1 = 20;	-- 将以上值修改为20，只能放置最后否则报错.
+	return num1 + num2;
+end$$
+DELIMITER ;
+```
+
+**【案例】**
+
+```mysql
+DELIMITER $$
+create function fun_test(a int,b int) returns int
+begin
+	declare num1 int default a;	-- 传值也能当默认值
+	declare num2 int default b;
+	return num1 + num2;
+end$$
+DELIMITER ;
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 ## 存储过程
+
+类似于java的方法
+
+```mysql
+Delimiter $$
+create procedure fun_1()
+begin
+end$$
+Delimiter ;
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 索引
+
+常见索引：
+
+​	主键、唯一、常规，全文索引.
+
+
+
+**常规索引.**
+
+> Index 创建三种方式
+
+```mysql
+create index 索引名 table 表名(字段名);
+```
+
+```mysql
+alter table 表名 add 索引名 index 表名(字段名);
+```
+
+```mysql
+CREATE TABLE  `result` (
+#省略一些代码
+INDEX/KEY `ind` (`studentNo`, `subjectNo`)  -- key || index 都为常规索引
+)
+```
+
+> 删除常规索引
+
+```mysql
+DROP INDEX 索引名 ON 表名
+```
+
+```mysql
+ALTER TABLE 表名 DROP INDEX 索引名
+```
+
+
+
+**全文索引.**
+
+​	\> 作用	
+
+​		快速定位特定数据
+
+​	\> 注意
+
+​		只能用于MyISAM类型的数据表
+
+​		只能用于 CHAR 、 VARCHAR、TEXT数据列类型
+
+​		适合大型数据集
+
+> 建立全文索引
+
+```mysql
+CREATE TABLE `student` (
+#省略一些SQL语句
+	FULLTEXT (`StudentName`); 
+)ENGINE=MYISAM;
+```
+
+> 追加索引
+
+```mysql
+alter table 表名 add FULLTEXT(`StudentName`);
+```
+
+> 删除索引
+
+```mysql
+alter table 表名 drop FULLTEXT(`StudentName`);
+```
+
+
+
+
+
+索引的作用？
+
+​	1.增加查询效率
+
+哪些列适合创建索引？
+
+​	1.经常查询的、不经常改动、字段内容少
+
+使用索引的注意事项？
+
+   	EXPLAIN可以帮助开发人员分析SQL问题,
+
+​	EXPLAIN显示了mysql如何使用索引来处理select语句以及连接表,
+
+​	可以帮助选择更好的索引和写出更优化的查询语句。
+
+
+
+索引虽然好处很多，但过多的使用索引可能带来相反的问题，索引也是有缺点的：
+
+​	虽然索引大大提高了查询速度，同时却会降低更新表的速度，如对表进行INSERT,UPDATE和DELETE。因为更新表时，mysql不仅要保存数据，还要保存一下索引文件
+
+​	建立索引会占用磁盘空间的索引文件。一般情况这个问题不太严重，但如果你在要给大表上建了多种组合索引，索引文件会膨胀很宽
+
+​      索引只是提高效率的一个方式，如果mysql有大数据量的表，就要花时间研究建立最优的索引，或优化查询语句。
+
+​     使用索引时，有一些技巧：
+
+​    1.索引不会包含有NULL的列
+
+​       只要列中包含有NULL值，都将不会被包含在索引中，复合索引中只要有一列含有NULL值，那么这一列对于此符合索引就是无效的。
+
+​    2.使用短索引
+
+​       对串列进行索引，如果可以就应该指定一个前缀长度。例如，如果有一个char（255）的列，如果在前10个或20个字符内，多数值是唯一的，那么就不要对整个列进行索引。短索引不仅可以提高查询速度而且可以节省磁盘空间和I/O操作。
+
+​    3.索引列排序
+
+​       mysql查询只使用一个索引，因此如果where子句中已经使用了索引的话，那么order by中的列是不会使用索引的。因此数据库默认排序可以符合要求的情况下不要使用排序操作，尽量不要包含多个列的排序，如果需要最好给这些列建复合索引。
+
+​    4.like语句操作
+
+​      一般情况下不鼓励使用like操作，如果非使用不可，注意正确的使用方式。like ‘%aaa%’不会使用索引，而like ‘aaa%’可以使用索引。
+
+​    5.不要在列上进行运算
+
+​    6.不使用NOT IN 、<>、！=操作，但<,<=，=，>,>=,BETWEEN,IN是可以用到索引的
+
+​    7.索引要建立在经常进行select操作的字段上。
+
+​       这是因为，如果这些列很少用到，那么有无索引并不能明显改变查询速度。相反，由于增加了索引，反而降低了系统的维护速度和增大了空间需求。
+
+​    8.索引要建立在值比较唯一的字段上。
+
+​    9.对于那些定义为text、image和bit数据类型的列不应该增加索引。因为这些列的数据量要么相当大，要么取值很少。
+
+​    10.在where和join中出现的列需要建立索引。
+
+​    11.where的查询条件里有不等号(where column != …),mysql将无法使用索引。
+
+​    12.如果where字句的查询条件里使用了函数(如：where DAY(column)=…),mysql将无法使用索引。
+
+​    13.在join操作中(需要从多个数据表提取数据时)，mysql只有在**主键和外键的数据类型相同**时才能使用索引，否则及时建立了索引也不会使用。
+
+
+
+
+
+
+
+## 视图
+
+**【概念】**
+
+​	视图是一张虚拟表，视图中不存放数据，存放查询sql的命令.
+
+![view](images\view.png)
+
+
+
+> 创建视图
+
+```mysql
+create view view_test01 
+as 
+select sName,sAge from student;
+```
+
+> 删除视图
+
+```mysql
+drop view 视图名;
+```
+
+> 调用视图
+
+```mysql
+select * from 视图名;
+```
+
+
+
+**【作用】**
+
+​	将复杂的sql命令一次封装，终身使用.
+
+
+
+**【注意事项】**
+
+​	视图中可以使用多个表
+
+​	一个视图可以嵌套另一个视图 
+
+​	对视图数据进行添加、更新和删除操作直接影响所引用表中的数据
+
+​	当视图数据来自**多个表**时，不允许添加和删除数据
+
+
+
+
+
+
 
 
 
