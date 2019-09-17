@@ -903,6 +903,21 @@ commit;
 
 \> 主要核心 方法名、返回类型、返回值 .
 
+> 创建函数格式
+
+```mysql
+create function 函数名() returns 返回值类型
+begin
+	return 返回值;
+end
+```
+
+> 删除函数
+
+```mysql
+drop function 函数名;
+```
+
 > 无参函数格式
 
 ```mysql
@@ -927,18 +942,24 @@ END $$
 DELIMITER ;
 ```
 
-**【函数中定义变量】**
+
+
+
+
+
+
+### 函数中定义变量
+
+> 创建变量
 
 ```mysql
-DELIMITER $$
-create function fun_test() returns int
-begin
-	declare num1 int default 10;	-- 默认赋值 10
-	declare num2 int default 20;	-- 默认赋值 20
-	set num1 = 20;	-- 将以上值修改为20，只能放置最后否则报错.
-	return num1 + num2;
-end$$
-DELIMITER ;
+declare 变量名 数据类型 [默认值];
+```
+
+> 修改变量值
+
+```mysql
+set 变量名 = 值;
 ```
 
 **【案例】**
@@ -956,11 +977,192 @@ DELIMITER ;
 
 
 
+### 语句
+
+#### IF语法
+
+每个if都需要结束.
+
+```mysql
+if 条件 then 语句[条件为真则执行];
+end if; -- 结束if语句
+```
+
+```mysql
+if 条件 then 语句;
+elseif 条件 then 语句;
+end if;
+```
+
+```mysql
+if 条件 then 语句;
+elseif 条件 then 语句;
+else 语句;
+end if;
+```
+
+**【案例演示】**
+
+```mysql
+delimiter $$
+create function anl_001(val int) returns varchar(20)
+begin 
+	if val = 1 then return "牛批";
+     elseif val = 2 then return "优秀";
+     else return "傻逼";
+     end if;	
+end$$
+delimiter;
+```
 
 
 
 
 
+
+
+
+
+
+
+
+
+#### CASE语法
+
+条件区间判断
+
+> switch用法 case后加值
+
+等值判断
+
+```mysql
+delimiter $$
+create function swt_001(`select` int) returns varchar(20)
+begin 
+    case `select`
+        when 1 then return "星期一";
+        when 2 then return "星期二";
+        when 3 then return "星期三";
+        when 4 then return "星期四";
+        else return "没有了";
+    end case;
+end$$
+delimiter;
+```
+
+> if用法 case后不能加值
+
+区间判断
+
+```mysql
+delimiter $$
+create function if_001(`course` int) returns varchar(20)
+begin 
+    case
+        when course >= 90 then return "真棒";
+        when course >= 80 then return "牛批";
+        when course >= 70 then return "666";
+        when course >= 60 then return "嘟嘟嘟";
+        else return "没有了";
+    end case;
+end$$
+delimiter;
+```
+
+
+
+
+
+
+
+
+
+
+
+#### loop 循环
+
+类似while循环默认为true，死循环 
+
+跳出循环的方式有：return、LEAVE 循环名称、ITERATE 循环名称
+
+```mysql
+delimiter $$
+create function loop_001() returns int
+begin
+	[循环名称:] loop	-- :是必须的
+		-- 循环中最低有一条语句
+		return 0;
+	end loop [循环名称];
+end$$
+delimiter ;
+```
+
+> LEAVE 循环名称	java中的break	跳出循环
+
+循环与LEAVE都必须加上循环名称，否则报错，end loop 建议加上否则嵌套循环会混乱.
+
+```mysql
+delimiter $$
+create function loop_001() returns int
+begin
+	ccc: loop
+		LEAVE ccc;
+	end loop ccc;
+end$$
+delimiter ;
+```
+
+> ITERATE 循环名称		java中的continue		跳出本次循环，执行下次循环
+
+循环与ITERATE 都必须加上循环名称，否则报错，end loop 建议加上否则嵌套循环会混乱.
+
+```mysql
+delimiter $$
+create function loop_001() returns int
+begin
+	ccc: loop
+		ITERATE ccc;
+	end loop ccc;
+end$$
+delimiter ;
+```
+
+
+
+
+
+
+
+#### REPEAT 循环
+
+类似java中的for循环   当 UNTIL中的条件满足则跳出循环
+
+> 语法格式
+
+```mysql
+REPEAT
+	SET a = a+1;
+	UNTIL a > 100 -- 不需要加;号
+END REPEAT;
+```
+
+**【案例演示】**
+
+从1加到101
+
+```mysql
+DELIMITER $$
+CREATE FUNCTION test_001() RETURNS INT
+BEGIN
+	DECLARE a,b INT DEFAULT 0;
+	REPEAT
+		SET a = a+1;
+		UNTIL a > 100	
+	END REPEAT;
+	RETURN a;
+END$$
+DELIMITER ;
+```
 
 
 
