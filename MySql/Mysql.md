@@ -12,7 +12,7 @@ Data Base Manager System.
 
 全称：data definition language 
 
-主要包含：CREATE、DROP、ALTER
+**主要包含：CREATE、DROP、ALTER**
 
 > 使用方式
 
@@ -56,6 +56,14 @@ CREATE TABLE user_1(
 
 ### DML 数据操作语言
 
+**全称：**Data Manipulation Language 
+
+**主要包含：INSERT、UPDATE、DELETE** 
+
+
+
+
+
 
 
 
@@ -64,6 +72,20 @@ CREATE TABLE user_1(
 
 ### DQL 数据查询语言
 
+**全称：**Data Query Language 
+
+**主要包含：SELECT ... FROM ... WHERE **
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -71,6 +93,48 @@ CREATE TABLE user_1(
 
 
 ### DCL 数据控制语言
+
+**全称：**Data control  Language 
+
+**主要包含：GRANT、REVOKE **
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### TCL 事务控制语言 
+
+全称：Transaction control language 
+
+**主要包含：COMMIT、ROLLBACK、SAVEPOINT **
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1182,17 +1246,134 @@ DELIMITER ;
 
 
 
+
+
+
+
+
+
+
+
 ## 存储过程
 
-类似于java的方法
+灵活性高，可以返回多个值，可以没有返回值
+
+> 格式
 
 ```mysql
-Delimiter $$
-create procedure fun_1()
-begin
-end$$
-Delimiter ;
+create procedure 名称([in|out|inout] 变量名 变量类型 ...)[begin end]
 ```
+
+**in:** 代表输入(**默认值**)
+
+​	外部传入的值在内部做修改后外部是不会发生变化的.		
+
+**out:** 代表输出	
+
+​	外部传入的值首先会被设为null，若内部进行修改则外部会发生变化.		
+
+**inout:** 代表即使输入又是输出.	
+
+​	外部传入的值不会被设为null，内部修改外部会发生变化.
+
+> 调用存储过程
+
+```mysql
+call 存储过程名称
+```
+
+**【in 案例】**
+
+```mysql
+-- 外面设俩个变量
+set @a = 10;
+set @b = 10;
+-- 创建存储过程
+delimiter $$
+create procedure pro_in_001(in a int,in b int)
+begin
+	set a = a + b;	-- 20
+	set b = a;	-- 20
+end$$
+delimiter ;
+-- 调用存储过程
+call pro_in_001(a,b);
+-- 查询设的变量是否发生改变
+select a,b;
+-- 结果 a=10,b=10 没发生变化.	in的作用只是可以接收外部传的值而不会改变外部值.
+```
+
+
+
+
+
+**【out 案例】**
+
+```mysql
+-- 外面设俩个变量
+set @a = 10;
+set @b = 10;
+-- 创建存储过程
+delimiter $$
+-- 改为out
+create procedure pro_in_001(out a int,out b int)
+begin
+	set a = a + b;	-- 20
+	set b = a;	-- 20
+end$$
+delimiter ;
+-- 调用存储过程
+call pro_in_001(a,b);
+-- 查询设的变量是否发生改变
+select a,b;
+-- 结果 a=null,b=null 外部变量发生变化	请仔细查看以上out的介绍
+```
+
+
+
+
+
+
+
+**【inout案例】**
+
+```mysql
+-- 外面设俩个变量
+set @a = 10;
+set @b = 10;
+-- 创建存储过程
+delimiter $$
+-- 改为out
+create procedure pro_in_001(out a int,out b int)
+begin
+	set a = a + b;	-- 20
+	set b = a;	-- 20
+end$$
+delimiter ;
+-- 调用存储过程
+call pro_in_001(a,b);
+-- 查询设的变量是否发生改变
+select a,b;
+-- 结果 a=20,b=20 外部变量发生变化	即使输出又是输入，仔细查看以上inout的案例
+```
+
+
+
+## 存储过程 与 函数的区别
+
+1. **共同点**	
+   1. 都会编译成mysql可以识别的文件，实现预编译的效果，执行速度快
+2. **不同点** 
+   1. 函数只能返回一个值，而存储过程可以通过out、inout返回多个值
+   2. 函数返回的值可以作为结果集，而存储过程不能直接作为结果集
+
+
+
+
+
+
+
+
 
 
 
@@ -1420,9 +1601,241 @@ select * from 视图名;
 
 
 
+## 异常处理
+
+**异常：**
+
+​	当程序遇到不正常的操作时导致程序停止就称为异常.
+
+**异常处理：**
+
+​	当程序遇到不正常的操作时不会停止运行，能够让程序继续执行的操作就称为异常处理.
+
+**错误：**
+
+​	当程序中语法错误导致程序无法执行就称为错误.
+
+> 声明格式
+
+```mysql
+declare 模式 handler for 异常类型 [begin end]
+```
+
+**【模式】：**
+
+​	**continue：**当遇到异常会先执行完异常处理中的代码然后跳过该发生异常的语句继续执行后面的语句.
+
+​	**exit：**当遇到异常不会执行发生异常后的语句，而是选择执行完异常处理中的代码后直接退出.
+
+**【异常类型】：**
+
+​	**错误代码：** 比如：1005：创建表失败、1006：创建数据库失败、1007：数据库已存在，创建数据库失败等
+
+​	**状态码：** 比如：SQLSTATE "23000" 重复键名称 SQLSTATE "HY000" 数据库已存在等
+
+​	**异常类型：** 比如：sqlexception、not found 等
+
+​	**优先级** ： 错误代码  --  状态码  --  异常类型	无论声明位置都按该优先级执行
 
 
 
+**【案例演示】**
+
+**使用错误代码**捕获对应的异常，
+
+模式选择**exit**.	
+
+已知：datatable已经存在，下面若调用存储过程会报错，异常会被捕获.
+
+```mysql
+delimiter $$
+create procedure pro_01()
+begin
+	-- 使用exit 当遇到错误停止执行后面的代码执行完异常处理中的代码后退出.
+	declare exit handler for 1007	
+	begin
+		select "数据库已存在" as "错误信息";
+	end;
+	create database datatable;
+	select "继续执行" as "状态";
+end$$
+delimiter ;
+```
+
+**结果：**打印数据库已存在，没有打印【继续执行】，因为exit选择直接退出
+
+
+
+
+
+**【案例演示】**
+
+**使用错误代码**捕获对应的异常，
+
+模式选择**Continue**
+
+已知：datatable已经存在，下面若调用存储过程会报错，异常会被捕获..
+
+```mysql
+delimiter $$
+create procedure pro_01()
+begin
+	-- 使用continue 当遇到错误停止执行后面的代码执行完异常处理中的代码后继续执行后面的代码.
+	declare continue handler for 1007	
+	begin
+		select "数据库已存在" as "错误信息";
+	end;
+	create database datatable;
+	select "继续执行" as "状态";
+end$$
+delimiter ;
+```
+
+**结果：** 打印数据库已存在、继续执行
+
+
+
+
+
+**【优先级案例演示】**
+
+```mysql
+delimiter $$
+create procedure pro_01()
+begin
+	-- 使用continue 当遇到错误停止执行后面的代码执行完异常处理中的代码后继续执行后面的代码.
+	declare exit handler for SQLException select "SQLException:数据库已存在" as "错误信息";
+	declare exit handler for SQLSTATE "HY000" select "SQLSTATE:数据库已存在" as "错误信息";
+	declare continue handler for 1007 select "1007:数据库已存在" as "错误信息";
+	create database datatable;
+	select "继续执行" as "状态";
+end$$
+delimiter ;
+```
+
+以上异常的声明顺序是SQLException【异常类型】、SQLSTATE【异常状态码】、1007【异常错误代码】
+
+但若出错，首先还是会先被异常对应的异常错误代码捕获到，若不存在该异常的错误代码则会被异常的状态码捕获，若都不存在最后才会被SQLException捕获.
+
+
+
+
+
+
+
+### 为异常建立别名
+
+> 格式
+
+```mysql
+declare 别名 condition for 异常类型; 
+```
+
+
+
+
+
+**【案例演示】**
+
+```mysql
+delimiter $$
+create procedure pro_001()
+begin
+	declare existDB condition for 1007;	-- 为异常取别名
+	declare exit handler for existDB select "数据库已存在" as "异常信息"; -- 捕获别名的异常.
+	create database datatable;
+end$$
+delimiter;
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 触发器
+
+类似于监听器、日志，当对一个表做了一些操作时满足条件的触发器就会触发，不能带结果集.
+
+比如：对表执行增加操作之后，触发器就会向专门存储日志的表中插入一句话，某某某增加了一条数据.
+
+> 格式
+
+```mysql
+CREATE TRIGGER trigger_name trigger_time trigger_event 
+ON tb_name 
+FOR EACH ROW trigger_statement
+```
+
+**【说明】**
+
+```txt
+trigger_name：触发器的名称。
+tirgger_time：触发时机，为BEFORE或者AFTER。
+trigger_event：触发事件，为INSERT、DELETE或者UPDATE。
+tb_name：表示建立触发器的表名，就是在哪张表上建立触发器。
+trigger_stmt：触发器的程序体，可以是一条SQL语句或者是用BEGIN和END包含的多条语句
+```
+
+**【案例】**
+
+主要功能就是若向userAccount中插入数据的话则会向logs表中插入一条记录
+
+```mysql
+CREATE TRIGGER `add` AFTER INSERT ON userAccount 
+FOR EACH ROW INSERT INTO `logs` VALUE("增加了一条数据";
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+``
 
 
 
