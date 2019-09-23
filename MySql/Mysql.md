@@ -1804,13 +1804,85 @@ tb_name：表示建立触发器的表名，就是在哪张表上建立触发器�
 trigger_stmt：触发器的程序体，可以是一条SQL语句或者是用BEGIN和END包含的多条语句
 ```
 
+> 显示、删除
+
+```mysql
+show triggers;  -- 显示当前数据库所有触发器
+drop trigger 触发器名称;
+```
+
+**【触发时机】**
+
+​	**【BEFORE】：** 在用户做操作之前执行触发器
+
+​	**【AFTER】：** 在用户做操作之后执行触发器
+
+**比如：**
+
+​	用户向表中插入一条数据，若选择BEFORE则先执行完触发器的内容再执行插入的操作
+
+​	若选择AFTER则先执行完插入操作后再执行触发器的内容
+
+**【触发事件】**
+
+​	当用户进行指定类型操作时才会执行触发器.
+
+​	**类型：**INSERT、UPDATE、DELETE.
+
+​	注意：在5.72版本以前，同一个类型的触发事件不允许添加两个相同的触发器。
+
 **【案例】**
 
-主要功能就是若向userAccount中插入数据的话则会向logs表中插入一条记录
+若有用户向userAccount中插入数据则会将该操作记录在logs表中.
 
 ```mysql
 CREATE TRIGGER `add` AFTER INSERT ON userAccount 
 FOR EACH ROW INSERT INTO `logs` VALUE("增加了一条数据";
+```
+
+该触发器在插入之后进行操作
+
+
+
+当用户做操作时获取用户增加|删除|修改操作的内容
+
+比如：用户删除了一条数据怎么将被删除的数据存储到日志表中？
+
+​	    用户修改了一条数据怎么将被更换老的数据或者新的数据存储到日志表中？
+
+**解决方案：new、old**
+
+new代表的是新的记录对象
+
+old代表的是老的记录对象
+
+```java
+在 INSERT 型触发器中，NEW 用来表示将要（BEFORE）或已经（AFTER）插入的新数据； 
+在 UPDATE 型触发器中，OLD 用来表示将要或已经被修改的原数据，NEW 用来表示将要或已经修改为的新数据； 
+在 DELETE 型触发器中，OLD 用来表示将要或已经被删除的原数据； 
+```
+
+比如：
+
+​	原来表中有一条记录 name = 张三，age = 17 但此时用户将name名为 张三 的值更改为 李四
+
+​	若想获得修改之前的值则使用old.name 则获得的为 张三，new.name  则获得的为 李四.
+
+```mysql
+create table student(
+	user varchar(20) primary key,
+    age int
+);
+create table `logs`(
+	content varchar(20),
+    user varchar(20)
+)
+```
+
+```mysql
+create trigger tri_01 before update
+on student
+for each row insert into `logs` values("用户修改了数据",old.user);  -- 此时获取的是老的值
 ```
 
 
