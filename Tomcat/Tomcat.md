@@ -213,3 +213,44 @@ Finish 就ok了
 若想选择用户默认进入页面则回到刚才的地方，将这里修改为想进入的页面就好了
 
 ![1565356302244](images\Idea_06.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#### 手动部署项目
+
+首先将项目打包成war包【eclipse右击项目导出搜索war，选择导出路径Destination 就可以打成war包】，将war包放入tomcat中的webapp下启动tomcat就可以访问该项目了。
+
+
+
+
+
+
+
+idea手动
+
+![idea_war01](images\idea_war01.png)
+
+![idea_war02](images\idea_war02.png)
+
+
+
+1为war包路径
+
+![idea_war03](images\idea_war03.png)
+
+
+
+
+

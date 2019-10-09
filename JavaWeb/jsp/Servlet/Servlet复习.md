@@ -841,7 +841,7 @@ protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
 ​	2.include	: 引入其他页面的资源文件【类似于html的框架，引入其他界面资源】
 
 ```xml
-<% @include file="界面名.jsp" %>
+<% @include file="?.jsp" %>  //通过该方式引入jsp与jsp之间会在同一个文件中，java变量可以互相调用
 ```
 
 ​	![include](images\include.png)
@@ -850,11 +850,21 @@ protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
 
 
 
+​	jsp:include	：引入其他页面的资源文件【类似于html的框架，引入其他界面资源】
+
+```html
+<jsp:include page="?.jsp" %>  //通过该方式引入tomcat底层会产生俩个servlet文件，变量不可以互相调用
+```
+
+
+
 ​	3.taglib		: 导入资源【比如struts2的标签库】
 
 ```xml
 <%@ taglib uri="/struts-tags" prefix="s" %>
 ```
+
+
 
 
 
@@ -871,6 +881,23 @@ jsp中可以使用注释：html、jsp【java但仅限于代码片段中】
 ```java
 <%--  --%>  jsp的注释，可以注释所有内容.
 ```
+
+**全局变量**
+
+```java
+<% String a = "123"  %>
+```
+
+**内部类、方法**
+
+```java
+<%! 
+    class a{}
+	public static void add(){}
+%>
+```
+
+
 
 
 
@@ -1600,6 +1627,18 @@ public class RequestListenter implements ServletRequestAttributeListener{
 		System.out.println("rquest中修改了一个参数");
 	}
 
+}
+
+public class RequestListenter implements ServletRequestListener{
+    @Override
+	public void requestDestroyed(ServletRequestEvent sre) {
+		System.out.println("销毁了一个request");
+	}
+
+	@Override
+	public void requestInitialized(ServletRequestEvent sre) {
+		System.out.println("诞生了一个request");
+	}
 }
 ```
 
