@@ -1167,13 +1167,19 @@ ${abc}	//结果 xjy1 因为page域范围最小.
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!-- 代码片段 -->
 <body>
-	<% request.setAttribute("value", "abc"); %>
-    	<!-- empty 若域中元素为null或长度为0则为true not 取反 -->
-	<c:if test="${not empty requestScope.value}">	
-		哇，还活着.
-	</c:if><br />
-	<c:if test="${empty requestScope.value}">
-		哇，是真的.
+	<%
+		List list = new ArrayList();
+		list.add("阿迪达斯");
+		list.add("耐克");
+		list.add("特步");
+		list.add("乔丹");
+		request.setAttribute("list", list);
+	%>
+	<c:if test="${empty list}">
+		为空是真的
+	</c:if>
+	<c:if test="${not empty list}">
+		不为空是真的
 	</c:if>
 </body>
 ```
@@ -1287,6 +1293,248 @@ ${abc}	//结果 xjy1 因为page域范围最小.
 	</table>
 </body>
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### 分页
+
+> 公式
+
+```java
+//(前台传入，默认页面从1开始)
+int page = 1;
+//显示数据
+int rows = 5;
+//起始位置	
+int start = (page - 1) * rows;	//若是第一页则start从集合的0位置开始
+int end = page * rows; //若是第一页则end从集合的5位置结束
+```
+
+
+
+
+
+
+
+
+
+
+
+### JNDI  
+
+tomcat配置文件中存储数据，当取数据时根据存入写的指定类型取出，根据键取值..
+
+**普通存值**
+
+```xml
+<!-- context.xml中 name为key type为取值类型 value为值 -->
+<Environment name="tjndi" value="hello JNDI" type="java.lang.String" />
+```
+
+**取值**
+
+```java
+//javax.naming.Context提供了查找JNDI 的接口  注意 tomcat开启时才会创建context对象
+Context ctx = new InitialContext();	
+//java:comp/env/为前缀 固定的
+String testjndi = (String)ctx.lookup("java:comp/env/tjndi");
+out.println("JNDI: "+testjndi);
+```
+
+
+
+
+
+**连接池配置**
+
+```xml
+<Resource 	name="jdbc/news" 	
+       		auth="Container" 	
+          	type="javax.sql.DataSource"  
+          	maxActive="100"  	
+       		maxIdle="30" 		
+          	maxWait="10000"  
+          
+          	username="root"   
+          	password="123" 
+      		driverClassName="com.mysql.jdbc.Driver"  
+      		url="jdbc:mysql://localhost:3306/news"
+/>
+<!-- name为取值用的键 -->
+<!-- auth指定管理Resource的容器，当前是tomcat -->
+<!-- type为连接池的数据源全路径 -->
+<!-- maxActive 最大活跃数 -->
+<!-- maxIdle 最大空闲数 -->
+<!-- maxWait 最大等待超时时间 -->
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+### 文件上传
+
+**需要导入jar包**
+
+```txt
+commons-fileupload-1.2.2.jar和commons-io-2.4.jar
+```
+
+表单form中请求方式必须是post，还必须加上一个属性 enctype="multipart/form-data"
+
+```xml
+<form enctype="multipart/form-data" method="post">
+```
+
+需要了解的类	FileItemFactory
+
+```java
+public void setSizeThreshold(int sizeThreshold)	设置内存缓冲区的大小
+public void setRepositoryPath(String path )	设置临时文件存放的目录
+```
+
+需要了解的类	ServletFileUpload
+
+```java
+public void setSizeMax(long sizeMax)	
+    		设置请求信息实体内容的最大允许的字节数
+public List parseRequest(HttpServletRequest req)
+    		解析form表单中的每个字符的数据，返回一个FileItem对象的集合
+public static final boolean isMultipartContent (HttpServletRequest req )	
+    		判断请求信息中的内容 是否是“multipart/form-data”类型
+public void setHeaderEncoding(String encoding)	
+    		设置转换时所使用的字符集编码
+```
+
+需要了解的类  FileItem
+
+```java
+public boolean isFormField()	
+    		判断FileItem对象封装的数据类型（普通表单字段返回true，文件表单字段返回false）
+public String getName()	
+    		获得文件上传字段中的文件名（普通表单字段返回null）
+public String getFieldName()	
+    		返回前台提交表单字段元素的name属性值
+public void write()	
+    		将FileItem对象中保存的主体内容保存到指定的文件中
+public String  getString()	
+    		返回前台提交表单的value类似于getparm..()
+public String  getString(String encoding)
+    		返回前台提交表单的value,参数用指定的字符集编码方式
+public long getSize()	
+    		返回单个上传文件的字节数
+```
+
+
+
+
+
+
+
+
+
+
+
+**【案例演示】**
+
+表单中只有文件，无任何其他参数
+
+```html
+<body>
+    <form action="fileServlet" enctype="multipart/form-data" method="post">
+    	<input type="file" name="file" />
+        <input type="submit">
+    </form>
+</body>
+```
+
+fileServlet界面【注意案例演示的描述】
+
+```java
+public void doPost(HttpServletRequest req,HttpServletResponse resp){
+    req.setCharacterEncoding("UTF-8");
+	String filePath = getServletContext().getRealPath("/file");//设置上传的临时文件存放位置
+	DiskFileItemFactory ff = new DiskFileItemFactory();
+	ff.setRepository(new File(filePath));	
+	ServletFileUpload fileUplod = new ServletFileUpload(ff);
+  
+    List<FileItem> list = fileUplod.parseRequest(req);
+    for(FileItem item:list){
+        item.write(new File(filePath,item.getName()));
+    }
+}
+```
+
+parseRequest：将上传表单中的input一个一个装进FileItem
+
+
+
+一个标准的有其他参数，有文件的文件上传
+
+**思路**
+
+获取提交表单的全部参数 fileUplod.parseRequest(req);
+
+根据FileItem中的方法判断自己是否为文件，若为文件则false，若为参数为true  fileItem.isFormField()
+
+若为文件则存储，若为参数则取出
+
+```java
+@Override
+protected void doPost(HttpServletRequest req, HttpServletResponse resp){
+	req.setCharacterEncoding("UTF-8");
+	String filePath = getServletContext().getRealPath("/file");
+	DiskFileItemFactory ff = new DiskFileItemFactory();
+	ff.setRepository(new File(filePath));
+	ff.setSizeThreshold(1024*10);
+	ServletFileUpload fileUplod = new ServletFileUpload(ff);
+	try {
+		List<FileItem> list = fileUplod.parseRequest(req);
+		for (FileItem fileItem : list) {
+			if(fileItem.isFormField()) {
+				System.out.println(fileItem.getFieldName() +"  "+fileItem.getString());
+			}else {
+				filePath = filePath+"/"+fileItem.getName();
+				System.out.println("图片"+fileItem.getName());
+				System.out.println(filePath);
+				File file = new File(filePath);
+				try {
+					fileItem.write(file);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				fileItem.delete();
+			}
+		}
+	} catch (FileUploadException e) {
+		e.printStackTrace();
+	}
+}
+```
+
+
 
 
 
