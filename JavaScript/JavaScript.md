@@ -147,6 +147,37 @@ length（代表参数个数） test_1.lenth 就可以获取参数个数
 3.在js中，方法调用只与方法名有关，与参数列表无关，不传或传超过指定参数都不会报错,正常运行
 ```
 
+**自定义对象**
+
+```javascript
+var Student = function(name,age,sex){
+    var name;
+    var age;
+    var sex;
+    var toString;
+    this.name = name;
+    this.age = age;
+    this.sex = sex;
+    this.toString = function(){
+        alert("name="+name+"age="+age+"sex="+sex);
+    }
+}
+var stu = new Student("张三",12,"男");
+stu.toString();
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -300,10 +331,6 @@ parseInt()
 其余全局方法参考 w3c:
 	https://www.w3school.com.cn/jsref/jsref_obj_global.asp
 ```
-
-
-
-
 
 
 
@@ -555,6 +582,13 @@ craeteElement("标签名"); //创建一个元素
 
 ```javaScript
 遵循w3c：https://www.w3school.com.cn/jsref/dom_obj_document.asp
+```
+
+##### innerHTML 与 InnerText
+
+```javascript
+document.getElementById("xxx").innerHTML = "<div>你好</div>" //可以动态识别标签或文字
+document.getElementById("xxx").InnerText = "<div>你好</div>" //无论是标签或其他都按文本插入 
 ```
 
 

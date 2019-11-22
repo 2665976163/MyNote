@@ -1294,6 +1294,16 @@ ${abc}	//结果 xjy1 因为page域范围最小.
 </body>
 ```
 
+迭代map集合
+
+```html
+<c:forEach items="${map}" var="item">
+${item.key.name}-${item.value}<br/>
+</c:forEach>
+```
+
+
+
 
 
 
@@ -1324,7 +1334,68 @@ int start = (page - 1) * rows;	//若是第一页则start从集合的0位置开�
 int end = page * rows; //若是第一页则end从集合的5位置结束
 ```
 
+**工具类**
 
+```java
+public class PageSwitch<T> {
+	private Integer start = 0;
+	private Integer rows = 5;
+	private Integer end = rows;
+	private Integer page = 1;
+
+	/* 初始化行列参数 第一执行*/
+	public void initParm(HttpServletRequest req, HttpServletResponse resp) {
+		String reqPage = req.getParameter("page");
+		String reqRows = req.getParameter("rows");
+		HttpSession session = req.getSession();
+		/* 显示多少行数据 */
+		if(reqRows != null) {
+			rows = Integer.valueOf(reqRows);
+		}
+		/* 第几页 */
+		if(reqPage != null) {
+			page = Integer.valueOf(reqPage) ;
+			start = (page - 1) * rows;
+			end = page * rows;
+		}
+	}
+	
+	public List<T> limit(List<T> list){
+		List<T> newList = new ArrayList();
+		end = end>=list.size()?list.size():end;
+		for (int i = start; i < end; i++) {
+			newList.add(list.get(i));
+		}
+		return newList;
+	}
+
+	public Integer getStart() {
+		return start;
+	}
+
+	public Integer getRows() {
+		return rows;
+	}
+
+	public Integer getEnd() {
+		return end;
+	}
+
+	public Integer getPage() {
+		return page;
+	}
+}
+
+```
+
+```html
+<a href="../QueryRoleServlet?page=${pages-1<1?1:pages-1}">上一页</a>
+<c:forEach begin="1" end="${count}" varStatus="i">
+	<a href="../QueryRoleServlet?page=${i.count}" id="index${i.count}">${i.count}</a>
+</c:forEach>
+<a href="../QueryRoleServlet?page=${pages+1>count?count:pages+1}"> 下一页</a>
+<span aria-hidden="true">共${count}页</span>
+```
 
 
 
@@ -1537,6 +1608,46 @@ protected void doPost(HttpServletRequest req, HttpServletResponse resp){
 
 
 
+
+
+
+
+
+
+
+
+
+### 状态码地址跳转
+
+```xml
+<error-page>
+  	<error-code>404</error-code> //当状态码为404时跳转到localtion中的地址中
+  	<location>/err.jsp</location>
+</error-page>
+```
+
+
+
+
+
+
+
+### 页面异常跳转
+
+可能发生异常的界面
+
+```html
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8" errorPage="erro.jsp"%> 设置errorPage 当异常发生时自动跳转到指定界面
+```
+
+异常处理界面
+
+```html
+<body>
+	请联系管理员 xxx ...
+</body>
+```
 
 
 
